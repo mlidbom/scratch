@@ -6,7 +6,6 @@ using System.Reflection;
 
 #endregion
 
-[Serializable]
 internal class ModuleInitializer
 {
     private static bool _initialized;
