@@ -9,41 +9,50 @@ using System.Reflection;
 [Serializable]
 internal class ModuleInitializer
 {
+    private static bool _initialized;
+
     public static void Run()
     {
-        Console.WriteLine("Running module initializer for {0} in appdomain {1}", Assembly.GetExecutingAssembly().FullName,
-                          AppDomain.CurrentDomain.FriendlyName);
-
         AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
     }
 
     private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
     {
-        Console.WriteLine("Looking for assembly {0} \n\tin assembly {1}\n\tin Appdomain {2}\n", args.Name, Assembly.GetExecutingAssembly().FullName, AppDomain.CurrentDomain.FriendlyName);
-
-        var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.FullName == args.Name);
-
-        if(loaded == null)
+        if(!_initialized)
         {
-            var requestedAssemblyName = new AssemblyName(args.Name).Name;            
-            var assemblyData = ReadMatchingResourceByteArray(requestedAssemblyName + ".dll");
+            _initialized = true;
 
-            if(assemblyData != null)
+            var embeddedAssemblies = Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(name => name.EndsWith(".dll")).ToList();
+            foreach(var embeddedAssembly in embeddedAssemblies)
             {
-                if(AssemblyNameExtractor.ExtractAssemblyName(assemblyData) == args.Name)
-                {
-                    var symbolsData = ReadMatchingResourceByteArray(requestedAssemblyName + ".pdb");
-                    loaded = Assembly.Load(assemblyData, symbolsData);
+                var assemblyData = ReadMatchingResourceByteArray(embeddedAssembly);
+                var pdbData = ReadMatchingResourceByteArray(embeddedAssembly.Replace(".dll", ".pdb"));
 
-                    Console.WriteLine("\tFound assembly {0} \n\t\tin assembly {1}\n\t\tin Appdomain {2}\n", args.Name, Assembly.GetExecutingAssembly().FullName, AppDomain.CurrentDomain.FriendlyName);
-                }
+                LoadIfNotAlreadyLoaded(assemblyData, pdbData);
             }
-        }else
-        {
-            Console.WriteLine("\tAssembly {0} was already loaded\n", args.Name);
         }
-        return loaded;
+
+        return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.FullName == args.Name);
     }
+
+    private static void LoadIfNotAlreadyLoaded(byte[] assemblyData, byte[] pdbData)
+    {
+        try
+        {
+            var name = Assembly.ReflectionOnlyLoad(assemblyData).FullName;
+            if (!AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.FullName == name))
+            {
+                Assembly.Load(assemblyData, pdbData);
+            }
+        }catch(System.IO.FileLoadException)
+        {
+           //Believe it or not this is what is thrown if the assembly is already loaded in the ReflectionOnly context..
+           //We will simply assume that this means another assembly using this code has already loaded this assembly. 
+           //The risk that we are mistaken should be extremely low.
+        }        
+    }
+
+   
 
     private static byte[] ReadMatchingResourceByteArray(string resourceName)
     {
@@ -57,34 +66,6 @@ internal class ModuleInitializer
             var resourceData = new Byte[resourceStream.Length];
             resourceStream.Read(resourceData, 0, resourceData.Length);
             return resourceData;
-        }
-    }
-
-
-    [Serializable]
-    public class AssemblyNameExtractor
-    {
-        public static string ExtractAssemblyName(byte[] assemblyData)
-        {
-            var domain = AppDomain.CreateDomain("TempDomain");
-            var nameExtractor = new AssemblyNameExtractor { _assemblyData = assemblyData };
-            Console.WriteLine("\textracting name");
-            domain.DoCallBack(nameExtractor.ExtractName);
-            AppDomain.Unload(domain);
-            return nameExtractor._nameHolder.Value;
-        }
-
-        private byte[] _assemblyData;
-        private readonly NameHolder _nameHolder = new NameHolder();
-
-        private void ExtractName()
-        {
-            _nameHolder.Value = Assembly.ReflectionOnlyLoad(_assemblyData).FullName;
-        }
-
-        private class NameHolder : MarshalByRefObject
-        {
-            public string Value;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Scratch
             Console.WriteLine("UsesEmbeddedAssemblyV1 says: {0}\n\n", UsesEmbeddedAssemblyV1.Main.SayHello());
 
             //Console.WriteLine("Calling: UsesEmbeddedAssemblyV2:");
-            //Console.WriteLine("UsesEmbeddedAssemblyV2 says: {0}\n\n", UsesEmbeddedAssemblyV2.Main.SayHello());
+            Console.WriteLine("UsesEmbeddedAssemblyV2 says: {0}\n\n", UsesEmbeddedAssemblyV2.Main.SayHello());
         }
     }
 }

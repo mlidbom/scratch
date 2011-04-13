@@ -86,7 +86,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>del "$(TargetDir)\EmbeddedAssembly.dll"</PostBuildEvent>
+    <PostBuildEvent>del "$(TargetDir)\EmbeddedAssembly.dll"
+del "$(TargetDir)\EmbeddedAssembly.pdb"
+del "$(TargetDir)\UsesEmbeddedAssemblyV1.dll"
+del "$(TargetDir)\UsesEmbeddedAssemblyV1.pdb"
+del "$(TargetDir)\UsesEmbeddedAssemblyV2.dll"
+del "$(TargetDir)\UsesEmbeddedAssemblyV2.pdb"
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>copy "$(SolutionDir)UsesEmbeddedAssemblyV1\$(OutDir)\UsesEmbeddedAssemblyV1.dll" "$(ProjectDir)\EmbeddedAssemblies"
