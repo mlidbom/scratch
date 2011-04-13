@@ -27,31 +27,31 @@ internal class ModuleInitializer
                 var assemblyData = ReadMatchingResourceByteArray(embeddedAssembly);
                 var pdbData = ReadMatchingResourceByteArray(embeddedAssembly.Replace(".dll", ".pdb"));
 
-                LoadIfNotAlreadyLoaded(assemblyData, pdbData);
+                if (!IsLoaded(assemblyData))
+                {
+                    Assembly.Load(assemblyData, pdbData);
+                }
             }
         }
 
         return AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.FullName == args.Name);
     }
 
-    private static void LoadIfNotAlreadyLoaded(byte[] assemblyData, byte[] pdbData)
+    private static bool IsLoaded(byte[] assemblyData)
     {
         try
         {
             var name = Assembly.ReflectionOnlyLoad(assemblyData).FullName;
-            if (!AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.FullName == name))
-            {
-                Assembly.Load(assemblyData, pdbData);
-            }
-        }catch(System.IO.FileLoadException)
+            return AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.FullName == name);
+        }
+        catch (System.IO.FileLoadException)
         {
-           //Believe it or not this is what is thrown if the assembly is already loaded in the ReflectionOnly context..
-           //We will simply assume that this means another assembly using this code has already loaded this assembly. 
-           //The risk that we are mistaken should be extremely low.
-        }        
+            //Believe it or not this is what is thrown if the assembly is already loaded in the ReflectionOnly context..
+            //We will simply assume that this means another assembly using this code has already loaded this assembly. 
+            //The risk that we are mistaken should be extremely low.
+            return true;
+        }   
     }
-
-   
 
     private static byte[] ReadMatchingResourceByteArray(string resourceName)
     {
