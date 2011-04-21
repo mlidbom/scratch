@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="InjectModuleInitializer" AssemblyFile="c:\Development\tmp\InjectModuleInitializer\bin\Release\InjectModuleInitializer.exe" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -35,9 +34,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Composable.CQRS">
-      <HintPath>.\Composable.CQRS.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>packages\NUnit.2.5.9.10348\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -58,41 +54,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="ModuleInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="EmbeddedAssembly\EmbeddedAssemblyV1.csproj">
-      <Project>{91990F80-DB9D-4A16-97D1-3DA9AE9F9FBE}</Project>
-      <Name>EmbeddedAssemblyV1</Name>
-    </ProjectReference>
-    <ProjectReference Include="UsesEmbeddedAssemblyV1\UsesEmbeddedAssemblyV1.csproj">
-      <Project>{B8E4AE43-8B43-4434-902C-34851E3829B6}</Project>
-      <Name>UsesEmbeddedAssemblyV1</Name>
-    </ProjectReference>
-    <ProjectReference Include="UsesEmbeddedAssemblyV2\UsesEmbeddedAssemblyV2.csproj">
-      <Project>{FA13221C-3D79-4828-816E-56D59A148DAB}</Project>
-      <Name>UsesEmbeddedAssemblyV2</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="EmbeddedAssemblies\UsesEmbeddedAssemblyV1.dll" />
-    <EmbeddedResource Include="EmbeddedAssemblies\UsesEmbeddedAssemblyV1.pdb" />
-    <EmbeddedResource Include="EmbeddedAssemblies\UsesEmbeddedAssemblyV2.dll" />
-    <EmbeddedResource Include="EmbeddedAssemblies\UsesEmbeddedAssemblyV2.pdb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>del "$(TargetDir)\EmbeddedAssembly.dll"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>copy "$(SolutionDir)UsesEmbeddedAssemblyV1\$(OutDir)\UsesEmbeddedAssemblyV1.dll" "$(ProjectDir)\EmbeddedAssemblies"
-copy "$(SolutionDir)UsesEmbeddedAssemblyV1\$(OutDir)\UsesEmbeddedAssemblyV1.pdb" "$(ProjectDir)\EmbeddedAssemblies"
-copy "$(SolutionDir)UsesEmbeddedAssemblyV2\$(OutDir)\UsesEmbeddedAssemblyV2.dll" "$(ProjectDir)\EmbeddedAssemblies"
-copy "$(SolutionDir)UsesEmbeddedAssemblyV2\$(OutDir)\UsesEmbeddedAssemblyV2.pdb" "$(ProjectDir)\EmbeddedAssemblies"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -101,7 +72,4 @@ copy "$(SolutionDir)UsesEmbeddedAssemblyV2\$(OutDir)\UsesEmbeddedAssemblyV2.pdb"
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Target Name="AfterBuild">
-    <InjectModuleInitializer AssemblyFile="$(TargetPath)" />
-  </Target>
 </Project>
