@@ -4,10 +4,12 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Transactions;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using NUnit.Framework;
 using Raven.Abstractions.Data;
 using Raven.Client.Document;
@@ -22,9 +24,9 @@ namespace Scratch
     {
         private const int TransactionBatchSize = 500;
         //private const int USER_COUNT = 10000;
-        private const int USER_COUNT = 25000;
+        private const int USER_COUNT = 10000;
         private const bool REMOVE_USERS = false;
-        private const int SqlBatchSize = 50;
+        private const int SqlBatchSize = 10;
 
         [Test]
         public void SqlConnect()
@@ -52,16 +54,29 @@ namespace Scratch
                                              var user = new User
                                                             {
                                                                 Id = Guid.NewGuid(),
-                                                                Name = "Yo! " + Guid.NewGuid()
+                                                                Name = "Yo! " + Guid.NewGuid(),
+                                                                Text1 = "some anoying really long text hi there i'm long and annoying dont you figure?????",
+                                                                Text2 = "some anoying really long text hi there i'm long and annoying dont you figure?????"
                                                             };
 
                                              command.CommandText +=
                                                  string.Format(
                                                      "INSERT Events(Id, Discriminator, StringValue) VALUES(@Id{0}, @Discriminator{0}, @StringValue{0})",
+                                                     //"INSERT Events(Id, Discriminator, BinaryValue) VALUES(@Id{0}, @Discriminator{0}, @BinaryValue{0})",
+                                                     //"INSERT Events(Id, Discriminator, BinaryValue, StringValue) VALUES(@Id{0}, @Discriminator{0}, @BinaryValue{0}, @StringValue{0})",
                                                      handledInBatch);
                                              command.Parameters.Add(new SqlParameter("Id" + handledInBatch, user.Id));
                                              command.Parameters.Add(new SqlParameter("Discriminator" + handledInBatch, user.GetType().FullName));
                                              command.Parameters.Add(new SqlParameter("StringValue" + handledInBatch, JsonConvert.SerializeObject(user)));
+
+                                             //using (var ms = new MemoryStream())
+                                             //{
+                                             //    var serializer = new JsonSerializer();
+                                             //    var writer = new BsonWriter(ms);
+
+                                             //    serializer.Serialize(writer, user);
+                                             //    command.Parameters.Add(new SqlParameter("BinaryValue" + handledInBatch, ms.ToArray()));
+                                             //}
                                          }
                                          command.ExecuteNonQuery();
                                      }
@@ -201,5 +216,7 @@ namespace Scratch
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Text1 { get; set; }
+        public string Text2 { get; set; }
     }
 }
