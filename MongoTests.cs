@@ -20,9 +20,79 @@ namespace Scratch
     [TestFixture]
     public class MongoTests
     {
+        private const int TransactionBatchSize = 500;
         //private const int USER_COUNT = 10000;
-        private const int USER_COUNT = 10000;
+        private const int USER_COUNT = 25000;
         private const bool REMOVE_USERS = false;
+        private const int SqlBatchSize = 50;
+
+        [Test]
+        public void SqlConnect()
+        {
+            Time(string.Format("inserting {0} users", USER_COUNT),
+                 () =>
+                     {
+                         var handled = 0;
+                         while(handled < USER_COUNT)
+                         {
+                             //Console.WriteLine("Starting new transaction");
+                             using(var tx = new TransactionScope())
+                             {
+                                 using(var connection = new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage"))
+                                 {
+                                     connection.Open();
+
+                                     for (var handledInTransaction = 0; handledInTransaction < TransactionBatchSize && handled < USER_COUNT; handledInTransaction += SqlBatchSize)
+                                     {
+                                         //Console.WriteLine("Starting new sql batch");
+                                         var command = connection.CreateCommand();
+                                         command.CommandType = CommandType.Text;
+                                         for(var handledInBatch = 0; handledInBatch < SqlBatchSize && handled < USER_COUNT; handledInBatch++, handled++)
+                                         {
+                                             var user = new User
+                                                            {
+                                                                Id = Guid.NewGuid(),
+                                                                Name = "Yo! " + Guid.NewGuid()
+                                                            };
+
+                                             command.CommandText +=
+                                                 string.Format(
+                                                     "INSERT Events(Id, Discriminator, StringValue) VALUES(@Id{0}, @Discriminator{0}, @StringValue{0})",
+                                                     handledInBatch);
+                                             command.Parameters.Add(new SqlParameter("Id" + handledInBatch, user.Id));
+                                             command.Parameters.Add(new SqlParameter("Discriminator" + handledInBatch, user.GetType().FullName));
+                                             command.Parameters.Add(new SqlParameter("StringValue" + handledInBatch, JsonConvert.SerializeObject(user)));
+                                         }
+                                         command.ExecuteNonQuery();
+                                     }
+
+                                     tx.Complete();
+                                 }
+                             }
+                         }
+                     });
+
+            if(!REMOVE_USERS)
+                return;
+
+            using(var tx = new TransactionScope())
+            {
+                using(var connection = new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage"))
+                {
+                    connection.Open();
+                    Time("removing all users",
+                         () =>
+                             {
+                                 var command = connection.CreateCommand();
+                                 command.CommandType = CommandType.Text;
+                                 command.CommandText = "DELETE Events";
+                                 command.ExecuteNonQuery();
+                             });
+                }
+                tx.Complete();
+            }
+        }
+
 
         [Test]
         public void ShouldConnect()
@@ -34,23 +104,23 @@ namespace Scratch
 
             Time(string.Format("inserting {0} users", USER_COUNT),
                  () =>
-                     {
-                         var toInsert = Enumerable.Range(0, USER_COUNT)
-                             .Select(_ =>
-                                     new User
-                                         {
-                                             Id = Guid.NewGuid(),
-                                             Name = "Yo! " + Guid.NewGuid()
-                                         });
+                 {
+                     var toInsert = Enumerable.Range(0, USER_COUNT)
+                         .Select(_ =>
+                                 new User
+                                 {
+                                     Id = Guid.NewGuid(),
+                                     Name = "Yo! " + Guid.NewGuid()
+                                 });
 
-                         users.InsertBatch(toInsert);
-                         //foreach(var user in toInsert)
-                         //{
-                         //    users.Save(user);
-                         //}
-                     });
+                     users.InsertBatch(toInsert);
+                     //foreach(var user in toInsert)
+                     //{
+                     //    users.Save(user);
+                     //}
+                 });
 
-            if(!REMOVE_USERS)
+            if (!REMOVE_USERS)
                 return;
             //Console.WriteLine(users.FindOneById(BsonValue.Create(user.Id)).Name);
             Time("removing all users", () => users.RemoveAll());
@@ -60,61 +130,18 @@ namespace Scratch
         public void RavenConnect()
         {
             var _documentStore = new DocumentStore
-                                     {
-                                         Url = "http://localhost:8080"
-                                         //,RunInMemory = true
-                                     };
+            {
+                Url = "http://localhost:8080"
+                //,RunInMemory = true
+            };
 
 
             _documentStore.Initialize();
             IndexCreation.CreateIndexes(typeof(Indexes.Users_ById).Assembly, _documentStore);
             using (var tx = new TransactionScope())
             {
-
-                using(var conn = _documentStore.OpenSession())
+                using (var conn = _documentStore.OpenSession())
                 {
-                    Time(string.Format("inserting {0} users", USER_COUNT),
-                         () =>
-                             {
-                                 for(var i = 0; i < USER_COUNT; i++)
-                                 {
-                                     var user = new User
-                                                    {
-                                                        Id = Guid.NewGuid(),
-                                                        Name = "Yo! " + Guid.NewGuid()
-                                                    };
-                                     conn.Store(user);
-                                 }
-                                 conn.SaveChanges();
-                             });                    
-                }
-                tx.Complete();
-            }
-
-            if (!REMOVE_USERS)
-                return;
-            using(var session = _documentStore.OpenSession())
-            {
-                Time("removing all users",
-                     () =>
-                         {
-                             session.Query<User, Indexes.Users_ById>().Customize(c => c.WaitForNonStaleResults()).ToList();
-                             _documentStore.DatabaseCommands.DeleteByIndex("Users/ById", new IndexQuery(), allowStale: false);
-                         });
-            }
-        }
-
-
-        [Test]
-        public void SqlConnect()
-        {
-
-            using (var tx = new TransactionScope())
-            {
-                using(var connection = new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage"))
-                {
-                    connection.Open();
-
                     Time(string.Format("inserting {0} users", USER_COUNT),
                          () =>
                          {
@@ -125,21 +152,9 @@ namespace Scratch
                                      Id = Guid.NewGuid(),
                                      Name = "Yo! " + Guid.NewGuid()
                                  };
-                                 var command = connection.CreateCommand();
-                                 command.CommandType = CommandType.StoredProcedure;
-                                 command.CommandText = "InsertEvent";
-                                 command.Parameters.Add(new SqlParameter("Id", user.Id));
-                                 command.Parameters.Add(new SqlParameter("Discriminator", user.GetType().FullName));
-                                 command.Parameters.Add(new SqlParameter("StringValue", JsonConvert.SerializeObject(user)));
-                                 command.ExecuteNonQuery();
-
-                                 //DataTable workTable = new DataTable("Users");
-
-                                 //workTable.Columns.Add("ID", typeof(Guid));
-                                 //workTable.Columns.Add("CustLName", typeof(String));
-                                 //workTable.Columns.Add("Discriminator", typeof(String));
-                                 //workTable.Columns.Add("StringValue", typeof(Double));
+                                 conn.Store(user);
                              }
+                             conn.SaveChanges();
                          });
                 }
                 tx.Complete();
@@ -147,24 +162,18 @@ namespace Scratch
 
             if (!REMOVE_USERS)
                 return;
-
-            using (var tx = new TransactionScope())
+            using (var session = _documentStore.OpenSession())
             {
-                using (var connection = new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage"))
-                {
-                    connection.Open();
-                    Time("removing all users",
-                         () =>
-                         {
-                             var command = connection.CreateCommand();
-                             command.CommandType = CommandType.Text;
-                             command.CommandText = "DELETE Events";
-                             command.ExecuteNonQuery();
-                         });
-                }
-                tx.Complete();
+                Time("removing all users",
+                     () =>
+                     {
+                         session.Query<User, Indexes.Users_ById>().Customize(c => c.WaitForNonStaleResults()).ToList();
+                         _documentStore.DatabaseCommands.DeleteByIndex("Users/ById", new IndexQuery(), allowStale: false);
+                     });
             }
         }
+
+
 
         private static void Time(string taskDescription, Action task)
         {
