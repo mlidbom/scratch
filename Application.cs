@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using MongoDB.Driver;
 
 #endregion
 
@@ -11,7 +12,7 @@ namespace Scratch
     {
         public static void Main()
         {
-            Console.WriteLine("Hello World");
+            
         }
     }
 }
