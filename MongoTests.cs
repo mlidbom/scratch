@@ -118,6 +118,24 @@ namespace Scratch
                     Time(string.Format("inserting {0} users", USER_COUNT),
                          () =>
                          {
+
+                             var usersTable = new DataTable("Users");
+                             usersTable.Columns.Add("Id", typeof(Guid));
+                             usersTable.Columns.Add("Discriminator", typeof(String));
+                             usersTable.Columns.Add("StringValue", typeof(String));
+
+                             var adapter = new SqlDataAdapter();
+                             var insertCommand = connection.CreateCommand();
+                             insertCommand.CommandType = CommandType.StoredProcedure;
+                             insertCommand.CommandText = "InsertEvent";
+                             insertCommand.Parameters.Add(new SqlParameter("Id", SqlDbType.UniqueIdentifier){ SourceColumn = "Id"});
+                             insertCommand.Parameters.Add("Discriminator", SqlDbType.NVarChar, 200, "Discriminator");
+                             insertCommand.Parameters.Add("StringValue", SqlDbType.NVarChar, int.MaxValue, "StringValue");
+                             insertCommand.UpdatedRowSource = UpdateRowSource.None;
+
+                             adapter.InsertCommand = insertCommand;
+                             adapter.UpdateBatchSize = 1;
+
                              for (var i = 0; i < USER_COUNT; i++)
                              {
                                  var user = new User
@@ -125,21 +143,13 @@ namespace Scratch
                                      Id = Guid.NewGuid(),
                                      Name = "Yo! " + Guid.NewGuid()
                                  };
-                                 var command = connection.CreateCommand();
-                                 command.CommandType = CommandType.StoredProcedure;
-                                 command.CommandText = "InsertEvent";
-                                 command.Parameters.Add(new SqlParameter("Id", user.Id));
-                                 command.Parameters.Add(new SqlParameter("Discriminator", user.GetType().FullName));
-                                 command.Parameters.Add(new SqlParameter("StringValue", JsonConvert.SerializeObject(user)));
-                                 command.ExecuteNonQuery();
-
-                                 //DataTable workTable = new DataTable("Users");
-
-                                 //workTable.Columns.Add("ID", typeof(Guid));
-                                 //workTable.Columns.Add("CustLName", typeof(String));
-                                 //workTable.Columns.Add("Discriminator", typeof(String));
-                                 //workTable.Columns.Add("StringValue", typeof(Double));
+                                 var userRow = usersTable.NewRow();
+                                 userRow["Id"] = user.Id;
+                                 userRow["Discriminator"] = user.GetType().FullName;
+                                 userRow["StringValue"] = JsonConvert.SerializeObject(user);
+                                 usersTable.Rows.Add(userRow);
                              }
+                             adapter.Update(usersTable);
                          });
                 }
                 tx.Complete();
