@@ -14,6 +14,7 @@ using NUnit.Framework;
 using Raven.Abstractions.Data;
 using Raven.Client.Document;
 using Raven.Client.Indexes;
+using Raven.Client.Extensions;
 
 #endregion
 
@@ -24,12 +25,14 @@ namespace Scratch
     {
         private const int TransactionBatchSize = 500;
         //private const int USER_COUNT = 10000;
-        private const int USER_COUNT = 10000;
-        private const bool REMOVE_USERS = false;
-        private const int SqlBatchSize = 10;
+        private const int USER_COUNT = 100000;
+        private const bool REMOVE_USERS = true;
+        private const int SqlBatchSize = 20;
+
+        private const int RavenBatchSize = 100;
 
         [Test]
-        public void SqlConnect()
+        public void SqlInsertUsers()
         {
             Time(string.Format("inserting {0} users", USER_COUNT),
                  () =>
@@ -40,24 +43,23 @@ namespace Scratch
                              //Console.WriteLine("Starting new transaction");
                              using(var tx = new TransactionScope())
                              {
-                                 using(var connection = new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage"))
+                                 using(
+                                     var connection =
+                                         new SqlConnection("Data Source=localhost;Initial Catalog=MyEventStorage;User ID=MyEventStorage;Password=MyEventStorage")
+                                     )
                                  {
                                      connection.Open();
 
-                                     for (var handledInTransaction = 0; handledInTransaction < TransactionBatchSize && handled < USER_COUNT; handledInTransaction += SqlBatchSize)
+                                     for(var handledInTransaction = 0;
+                                         handledInTransaction < TransactionBatchSize && handled < USER_COUNT;
+                                         handledInTransaction += SqlBatchSize)
                                      {
                                          //Console.WriteLine("Starting new sql batch");
                                          var command = connection.CreateCommand();
                                          command.CommandType = CommandType.Text;
                                          for(var handledInBatch = 0; handledInBatch < SqlBatchSize && handled < USER_COUNT; handledInBatch++, handled++)
                                          {
-                                             var user = new User
-                                                            {
-                                                                Id = Guid.NewGuid(),
-                                                                Name = "Yo! " + Guid.NewGuid(),
-                                                                Text1 = "some anoying really long text hi there i'm long and annoying dont you figure?????",
-                                                                Text2 = "some anoying really long text hi there i'm long and annoying dont you figure?????"
-                                                            };
+                                             var user = CreateUser();
 
                                              command.CommandText +=
                                                  string.Format(
@@ -69,14 +71,14 @@ namespace Scratch
                                              command.Parameters.Add(new SqlParameter("Discriminator" + handledInBatch, user.GetType().FullName));
                                              command.Parameters.Add(new SqlParameter("StringValue" + handledInBatch, JsonConvert.SerializeObject(user)));
 
-                                             //using (var ms = new MemoryStream())
-                                             //{
-                                             //    var serializer = new JsonSerializer();
-                                             //    var writer = new BsonWriter(ms);
+                                             using(var ms = new MemoryStream())
+                                             {
+                                                 var serializer = new JsonSerializer();
+                                                 var writer = new BsonWriter(ms);
 
-                                             //    serializer.Serialize(writer, user);
-                                             //    command.Parameters.Add(new SqlParameter("BinaryValue" + handledInBatch, ms.ToArray()));
-                                             //}
+                                                 serializer.Serialize(writer, user);
+                                                 command.Parameters.Add(new SqlParameter("BinaryValue" + handledInBatch, ms.ToArray()));
+                                             }
                                          }
                                          command.ExecuteNonQuery();
                                      }
@@ -110,7 +112,7 @@ namespace Scratch
 
 
         [Test]
-        public void ShouldConnect()
+        public void MongoInsertUsers()
         {
             var server = MongoServer.Create("mongodb://localhost/?safe=true");
             var db = server.GetDatabase("MyTestDB");
@@ -119,75 +121,80 @@ namespace Scratch
 
             Time(string.Format("inserting {0} users", USER_COUNT),
                  () =>
-                 {
-                     var toInsert = Enumerable.Range(0, USER_COUNT)
-                         .Select(_ =>
-                                 new User
-                                 {
-                                     Id = Guid.NewGuid(),
-                                     Name = "Yo! " + Guid.NewGuid()
-                                 });
+                     {
+                         for(int inserted = 0; inserted < USER_COUNT; )
+                         {
+                             var toInsert = Enumerable.Range(0, TransactionBatchSize)
+                                 .Select(_ => CreateUser())
+                                 .Take(USER_COUNT - inserted)
+                                 .ToArray();
+                             //users.InsertBatch(toInsert);
+                             foreach (var user in toInsert)
+                             {
+                                 users.Insert(user);
+                             }
+                             inserted += toInsert.Count();
+                         }
+                         
+                         //foreach(var user in toInsert)
+                         //{
+                         //    users.Save(user);
+                         //}
+                     });
 
-                     users.InsertBatch(toInsert);
-                     //foreach(var user in toInsert)
-                     //{
-                     //    users.Save(user);
-                     //}
-                 });
-
-            if (!REMOVE_USERS)
+            if(!REMOVE_USERS)
                 return;
             //Console.WriteLine(users.FindOneById(BsonValue.Create(user.Id)).Name);
             Time("removing all users", () => users.RemoveAll());
         }
 
         [Test]
-        public void RavenConnect()
+        public void ZRavenInsertUsers()
         {
             var _documentStore = new DocumentStore
-            {
-                Url = "http://localhost:8080"
-                //,RunInMemory = true
-            };
-
+                                     {
+                                         Url = "http://localhost:8080"
+                                         //,RunInMemory = true
+                                     };
 
             _documentStore.Initialize();
-            IndexCreation.CreateIndexes(typeof(Indexes.Users_ById).Assembly, _documentStore);
-            using (var tx = new TransactionScope())
-            {
-                using (var conn = _documentStore.OpenSession())
-                {
-                    Time(string.Format("inserting {0} users", USER_COUNT),
-                         () =>
-                         {
-                             for (var i = 0; i < USER_COUNT; i++)
-                             {
-                                 var user = new User
-                                 {
-                                     Id = Guid.NewGuid(),
-                                     Name = "Yo! " + Guid.NewGuid()
-                                 };
-                                 conn.Store(user);
-                             }
-                             conn.SaveChanges();
-                         });
-                }
-                tx.Complete();
-            }
+            //IndexCreation.CreateIndexes(typeof(Indexes.Users_ById).Assembly, _documentStore);
 
-            if (!REMOVE_USERS)
-                return;
-            using (var session = _documentStore.OpenSession())
-            {
-                Time("removing all users",
-                     () =>
+            var handled = 0;
+            Time(string.Format("inserting {0} users", USER_COUNT),
+                 () =>
                      {
-                         session.Query<User, Indexes.Users_ById>().Customize(c => c.WaitForNonStaleResults()).ToList();
-                         _documentStore.DatabaseCommands.DeleteByIndex("Users/ById", new IndexQuery(), allowStale: false);
+                         while(handled < USER_COUNT)
+                         {
+                             using(var tx = new TransactionScope())
+                             {
+                                 using(var conn = _documentStore.OpenSession())
+                                 {
+                                     for(var handledInTransaction = 0;
+                                         handledInTransaction < TransactionBatchSize && handled < USER_COUNT;
+                                         handledInTransaction++, handled++)
+                                     {
+                                         conn.Store(CreateUser());
+                                     }
+                                     conn.SaveChanges();
+                                 }
+                                 tx.Complete();
+                             }
+                         }
                      });
-            }
-        }
 
+            if(!REMOVE_USERS)
+                return;
+            //using(var session = _documentStore.OpenSession())
+            //{
+            //    Time("removing all users",
+            //         () =>
+            //             {
+            //                 session.Query<User, Indexes.Users_ById>().Customize(c => c.WaitForNonStaleResults()).ToList();
+            //                 _documentStore.DatabaseCommands.DeleteByIndex("Users/ById", new IndexQuery(), allowStale: false);
+            //             });
+            //}
+        }
 
 
         private static void Time(string taskDescription, Action task)
@@ -198,19 +205,31 @@ namespace Scratch
             task();
             Console.WriteLine("Done in: {0} milliseconds", watch.ElapsedMilliseconds);
         }
-    }
 
-    public class Indexes
-    {
-        public class Users_ById : AbstractIndexCreationTask<User>
+        private static User CreateUser()
         {
-            public Users_ById()
-            {
-                Map = users => from user in users
-                               select new { user.Id };
-            }
+            return new User
+                       {
+                           Id = Guid.NewGuid(),
+                           Name = "Yo! " + Guid.NewGuid(),
+                           Text1 = "some anoying really long text hi there i'm long and annoying dont you figure?????",
+                           Text2 = "some anoying really long text hi there i'm long and annoying dont you figure?????"
+                       };
         }
     }
+
+    //public class Indexes
+    //{
+    //    public class Users_ById : AbstractIndexCreationTask<User>
+    //    {
+    //        public Users_ById()
+    //        {
+    //            Map = users => from user in users
+    //                           select new { Id = user.Id };
+    //        }
+    //    }
+    //}
+
 
     public class User
     {
