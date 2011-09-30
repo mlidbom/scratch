@@ -34,14 +34,105 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>packages\NUnit.2.5.9.10348\lib\nunit.framework.dll</HintPath>
+    <Reference Include="Autofac">
+      <HintPath>packages\NServiceBus.Autofac.2.6.0.1505\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Configuration">
+      <HintPath>packages\Autofac.2.3.2.632\lib\NET40\Autofac.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Mef">
+      <HintPath>packages\Autofac.2.3.2.632\lib\NET40\Autofac.Integration.Mef.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Wcf">
+      <HintPath>packages\Autofac.2.3.2.632\lib\NET40\Autofac.Integration.Wcf.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Core">
+      <HintPath>packages\NServiceBus.CastleWindsor.2.6.0.1505\lib\net40\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.DynamicProxy2">
+      <HintPath>packages\NServiceBus.CastleWindsor.2.6.0.1505\lib\net40\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.MicroKernel">
+      <HintPath>packages\NServiceBus.CastleWindsor.2.6.0.1505\lib\net40\Castle.MicroKernel.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor">
+      <HintPath>packages\NServiceBus.CastleWindsor.2.6.0.1505\lib\net40\Castle.Windsor.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging">
+      <HintPath>packages\NServiceBus.Distributor.2.6.0.1505\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ObjectBuilder2">
+      <HintPath>packages\NServiceBus.Unity.2.6.0.1505\lib\net40\Microsoft.Practices.ObjectBuilder2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity">
+      <HintPath>packages\NServiceBus.Unity.2.6.0.1505\lib\net40\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="MsmqWorkerAvailabilityManager">
+      <HintPath>packages\NServiceBus.Distributor.2.6.0.1505\lib\net40\MsmqWorkerAvailabilityManager.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\NServiceBus.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Core">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\NServiceBus.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Distributor">
+      <HintPath>packages\NServiceBus.Distributor.2.6.0.1505\lib\net40\NServiceBus.Distributor.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Gateway">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\NServiceBus.Gateway.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Host">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\NServiceBus.Host.exe</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.Autofac">
+      <HintPath>packages\NServiceBus.Autofac.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.Autofac2">
+      <HintPath>packages\NServiceBus.Autofac2.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.Autofac2.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.CastleWindsor">
+      <HintPath>packages\NServiceBus.CastleWindsor.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.CastleWindsor.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.StructureMap">
+      <HintPath>packages\NServiceBus.StructureMap.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.StructureMap.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.StructureMap262">
+      <HintPath>packages\NServiceBus.StructureMap262.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.StructureMap262.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.ObjectBuilder.Unity">
+      <HintPath>packages\NServiceBus.Unity.2.6.0.1505\lib\net40\NServiceBus.ObjectBuilder.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Proxy">
+      <HintPath>packages\NServiceBus.Proxy.2.6.0.1505\lib\net40\NServiceBus.Proxy.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Testing">
+      <HintPath>packages\NServiceBus.Testing.2.6.0.1505\lib\net40\NServiceBus.Testing.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Unicast.Distributor">
+      <HintPath>packages\NServiceBus.Distributor.2.6.0.1505\lib\net40\NServiceBus.Unicast.Distributor.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.5.2.9222, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\NServiceBus.TimeoutManager.2.6.0.1505\lib\net40\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.mocks">
       <HintPath>packages\NUnit.2.5.9.10348\lib\nunit.mocks.dll</HintPath>
     </Reference>
     <Reference Include="pnunit.framework">
       <HintPath>packages\NUnit.2.5.9.10348\lib\pnunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="StructureMap">
+      <HintPath>packages\NServiceBus.StructureMap.2.6.0.1505\lib\net40\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,10 +142,23 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Timeout.MessageHandlers">
+      <HintPath>packages\NServiceBus.TimeoutManager.2.6.0.1505\lib\net40\Timeout.MessageHandlers.dll</HintPath>
+    </Reference>
+    <Reference Include="Timeout.Tests">
+      <HintPath>packages\NServiceBus.TimeoutManager.2.6.0.1505\lib\net40\Timeout.Tests.dll</HintPath>
+    </Reference>
+    <Reference Include="Topshelf">
+      <HintPath>packages\NServiceBus.Gateway.2.6.0.1505\lib\net40\Topshelf.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
