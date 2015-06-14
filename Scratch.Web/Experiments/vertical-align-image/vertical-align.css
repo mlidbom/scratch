@@ -1,0 +1,12 @@
+﻿
+div > div {
+    float: left;
+    font-size: 1.2em;
+    width: 150px;
+}
+
+img {
+    border: solid;
+    height:30px;
+    width: 30px;    
+}

@@ -1,0 +1,12 @@
+﻿
+div > div {
+    float: left;
+    font-size: 1.2em;
+    width: 150px;
+}
+
+span {
+    border: solid;
+    border-width: 1px;
+    line-height: 50px;
+}

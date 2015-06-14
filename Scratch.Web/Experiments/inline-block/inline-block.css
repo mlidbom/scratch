@@ -1,0 +1,12 @@
+﻿
+div {
+    border: 1px solid black;
+}
+div > div {
+    padding: 10px;
+    margin-right: -4px;
+    display: inline-block;
+    font-size: 1.2em;
+    max-width: 500px;
+    min-width: 300px;    
+}
