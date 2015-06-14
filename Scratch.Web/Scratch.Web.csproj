@@ -67,6 +67,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Experiments\310-float\float.css" />
+    <Content Include="Experiments\310-float\float.html" />
     <Content Include="Experiments\300-inline-block\inline-block.css" />
     <Content Include="Experiments\300-inline-block\inline-block.html" />
     <Content Include="Experiments\200-vertical-align-text\vertical-align-text.css" />
