@@ -67,12 +67,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Experiments\inline-block\inline-block.css" />
-    <Content Include="Experiments\inline-block\inline-block.html" />
-    <Content Include="Experiments\vertical-align-text\vertical-align-text.css" />
-    <Content Include="Experiments\vertical-align-text\vertical-align-text.html" />
-    <Content Include="Experiments\vertical-align-image\vertical-align.css" />
-    <Content Include="Experiments\vertical-align-image\vertical-align.html" />
+    <Content Include="Experiments\300-inline-block\inline-block.css" />
+    <Content Include="Experiments\300-inline-block\inline-block.html" />
+    <Content Include="Experiments\200-vertical-align-text\vertical-align-text.css" />
+    <Content Include="Experiments\200-vertical-align-text\vertical-align-text.html" />
+    <Content Include="Experiments\100-vertical-align-image\vertical-align.css" />
+    <Content Include="Experiments\100-vertical-align-image\vertical-align.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
