@@ -1,0 +1,16 @@
+﻿
+div {
+    border: 1px solid black;
+}
+
+div#container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+div > div {
+    padding: 10px;
+    font-size: 1.2em;
+    max-width: 500px;
+    min-width: 300px;    
+}
