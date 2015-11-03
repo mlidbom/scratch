@@ -1,0 +1,45 @@
+﻿NCrunch: This test was executed on server '(local)'
+
+    Before OpenSession:  00000000-0000-0000-0000-000000000000
+    After OpenSession:  00000000-0000-0000-0000-000000000000
+    After CreateCommand:  00000000-0000-0000-0000-000000000000
+    Before Executereader:  00000000-0000-0000-0000-000000000000
+    After ExecuteReader:  00000000-0000-0000-0000-000000000000
+    Read a row from Data Source=experisdevsql;Initial Catalog=ApplicationLogs ;User ID=ApplicationLogs ;Password=ApplicationLogs
+    Before OpenSession:  00000000-0000-0000-0000-000000000000
+    After OpenSession:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    After CreateCommand:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    Before Executereader:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    After ExecuteReader:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    Read a row from Data Source=experistestsql;Initial Catalog=ApplicationLogs ;User ID=ApplicationLogs ;Password=ApplicationLogs
+Preparing: Data Source=experisdevsql;Initial Catalog=ApplicationLogs ;User ID=ApplicationLogs ;Password=ApplicationLogs
+    Preparing:  
+    Preparing:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    Before OpenSession:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    After OpenSession:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    After CreateCommand:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+    Before Executereader:  d784042f-b8a1-42b8-af42-83b7c3cae56c
+System.InvalidOperationException: The transaction associated with the current connection has completed but has not been disposed.  The transaction must be disposed before the connection can be used to execute SQL statements.
+   at System.Data.SqlClient.SqlInternalConnectionTds.CheckEnlistedTransactionBinding()
+   at System.Data.SqlClient.TdsParser.TdsExecuteSQLBatch(String text, Int32 timeout, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, Boolean sync, Boolean callerHasConnectionLock)
+   at System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean asyncWrite)
+   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
+   at System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
+   at System.Data.SqlClient.SqlCommand.ExecuteReader()
+   at Scratch.Tests.PersistentParticipant.DoWork() in C:\Development\Scratch\Scratch.Tests\EscalationDoesNotWorkOnPrepareEvenWithEnlistmentDuringPrepareRequired.cs:line 63
+   at Scratch.Tests.CachingParticipant.Prepare(PreparingEnlistment preparingEnlistment) in C:\Development\Scratch\Scratch.Tests\EscalationDoesNotWorkOnPrepareEvenWithEnlistmentDuringPrepareRequired.cs:line 98
+System.Transactions.TransactionAbortedException : The transaction has aborted.
+  ----> System.TimeoutException : Transaction Timeout
+   at System.Transactions.TransactionStatePromotedAborted.PromotedTransactionOutcome(InternalTransaction tx)
+   at System.Transactions.TransactionStatePromotedEnded.EndCommit(InternalTransaction tx)
+   at System.Transactions.CommittableTransaction.Commit()
+   at System.Transactions.TransactionScope.InternalDispose()
+   at System.Transactions.TransactionScope.Dispose()
+   at Scratch.Tests.EscalationDoesNotWorkOnPrepareEvenWithEnlistmentDuringPrepareRequired.Doesn_hang_when_transaction_is_already_distributed() in C:\Development\Scratch\Scratch.Tests\EscalationDoesNotWorkOnPrepareEvenWithEnlistmentDuringPrepareRequired.cs:line 42
+--TimeoutException
+
+
+
+
+
