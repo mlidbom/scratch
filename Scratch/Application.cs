@@ -12,6 +12,8 @@ namespace Scratch
         public static void Main()
         {
             Console.WriteLine("Hello World");
+            var test = (object) null;
+            test.Equals(null);
         }
     }
 }
